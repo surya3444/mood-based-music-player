@@ -1,0 +1,39 @@
+:root {
+  --background-base: #121212;
+  --background-highlight: #1a1a1a;
+  --background-press: #000;
+  --spotify-green: #1db954;
+  --spotify-green-press: #1aa34a;
+  --text-base: #ffffff;
+  --text-subdued: #b3b3b3;
+  --essential-base: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background-base);
+  color: var(--text-base);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--background-press);
+}
+
+.content-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  color: var(--essential-base);
+}

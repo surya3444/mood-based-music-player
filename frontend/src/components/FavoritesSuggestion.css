@@ -1,0 +1,67 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+}
+
+.suggestion-modal {
+  background-color: var(--background-highlight);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  padding: 1.5rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #282828;
+  padding-bottom: 1rem;
+}
+
+.favorites-list {
+  /* Use the same songs-grid styles for consistency */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+/* ADD THESE STYLES to FavoritesSuggestion.css */
+
+.suggestion-modal {
+  position: relative;
+  overflow: hidden; /* Hide the overflow of the progress bar */
+}
+
+.modal-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  background-color: var(--spotify-green);
+  width: 100%;
+  animation: shrink 10s linear forwards;
+}
+
+@keyframes shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

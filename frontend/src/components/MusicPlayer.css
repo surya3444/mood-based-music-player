@@ -1,0 +1,100 @@
+.music-player-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  background-color: #181818;
+  border-top: 1px solid #282828;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  align-items: center;
+  padding: 0 24px;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.song-details {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.player-cover-art {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  margin-right: 16px;
+}
+
+.player-title {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.player-artist {
+  color: var(--text-subdued);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.player-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.player-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.control-button {
+  background: none;
+  border: none;
+  color: var(--text-subdued);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-button:hover {
+  color: var(--text-base);
+  transform: scale(1.1);
+}
+
+.audio-controls {
+  width: 100%;
+  max-width: 600px;
+}
+
+.player-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-subdued);
+  transition: all 0.2s ease;
+}
+
+.like-button.liked {
+  color: var(--spotify-green);
+}
+
+.like-button:hover {
+  color: var(--text-base);
+}
+/* ADD THIS to MusicPlayer.css */
+.queue-button {
+  font-size: 1.2rem; /* Make it slightly smaller than other controls */
+  margin-left: 1rem;
+}
