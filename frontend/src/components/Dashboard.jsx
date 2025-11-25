@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 import * as faceapi from 'face-api.js';
-import { IoPlay } from 'react-icons/io5';
+import { IoPlay, IoMusicalNotes } from 'react-icons/io5';
 import { FaRedo } from 'react-icons/fa';
 import './Dashboard.css';
 
@@ -12,13 +12,18 @@ const Dashboard = () => {
 
   const [isDetectingMood, setIsDetectingMood] = useState(true);
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  
+  // --- STATE MANAGEMENT ---
   const [mood, setMood] = useState(null);
+  const [previousMood, setPreviousMood] = useState(null); // <-- NEW STATE
+  const [moodConfidence, setMoodConfidence] = useState(null);
+  // ------------------------
+
   const [playlists, setPlaylists] = useState([]);
   const [loadingMessage, setLoadingMessage] = useState('Loading face-api models...');
   const [error, setError] = useState(null);
   const detectionInterval = useRef(null);
 
-  // --- NEW STATE for the language filter ---
   const [selectedLanguage, setSelectedLanguage] = useState('all');
 
   useEffect(() => {
@@ -79,6 +84,20 @@ const Dashboard = () => {
       });
   };
 
+  const speakMood = (detectedMood) => {
+    if ('speechSynthesis' in window) {
+      const synth = window.speechSynthesis;
+      synth.cancel(); 
+      
+      const text = `You look ${detectedMood}. Here is some music for you.`;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      
+      synth.speak(utterance);
+    }
+  };
+
   const handleVideoPlay = () => {
     setLoadingMessage('Look at the camera...');
     detectionInterval.current = setInterval(async () => {
@@ -90,6 +109,11 @@ const Dashboard = () => {
           const dominantExpression = Object.keys(detections.expressions).reduce((a, b) =>
             detections.expressions[a] > detections.expressions[b] ? a : b
           );
+          
+          const confidence = detections.expressions[dominantExpression];
+          setMoodConfidence(confidence);
+
+          speakMood(dominantExpression); 
           setMood(dominantExpression);
           setIsDetectingMood(false);
           stopWebcam();
@@ -99,10 +123,16 @@ const Dashboard = () => {
   };
   
   const restartMoodDetection = () => {
+    // --- SAVE PREVIOUS MOOD BEFORE RESETTING ---
+    if (mood) {
+      setPreviousMood(mood);
+    }
+    // ------------------------------------------
     setMood(null);
+    setMoodConfidence(null);
     setPlaylists([]);
     setError(null);
-    setSelectedLanguage('all'); // <-- Reset the language filter
+    setSelectedLanguage('all');
     setIsDetectingMood(true);
   };
 
@@ -119,7 +149,6 @@ const Dashboard = () => {
     }
   };
 
-  // --- DYNAMICALLY get unique languages from the fetched songs ---
   const availableLanguages = [...new Set(
     playlists.flatMap(playlist => playlist.songs.map(song => song.language))
   )];
@@ -134,38 +163,62 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="mood-result-container">
-          <button onClick={restartMoodDetection} className="find-mood-button">
-            <FaRedo /> Find Mood Again
-          </button>
-          
-          {/* --- NEW: The Language Filter Dropdown --- */}
-          {availableLanguages.length > 0 && (
-            <select
-              className="language-filter"
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-            >
-              <option value="all">All Languages</option>
-              {availableLanguages.map(lang => (
-                <option key={lang} value={lang}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</option>
-              ))}
-            </select>
-          )}
+          <div className="mood-info">
+            {/* --- SHOW PREVIOUS MOOD IF EXISTS --- */}
+            {previousMood && (
+              <p className="previous-mood">
+                Previous: <span className="prev-highlight">{previousMood}</span>
+              </p>
+            )}
+            {/* ------------------------------------ */}
+            
+            <h2>
+              Mood: <span className="highlight">{mood}</span>
+            </h2>
+            {moodConfidence && (
+              <p className="accuracy-text">
+                Match Accuracy: {(moodConfidence * 100).toFixed(1)}%
+              </p>
+            )}
+          </div>
+
+          <div className="controls-row">
+            <button onClick={restartMoodDetection} className="find-mood-button">
+              <FaRedo /> Find Mood Again
+            </button>
+            
+            {availableLanguages.length > 0 && (
+              <select
+                className="language-filter"
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+              >
+                <option value="all">All Languages</option>
+                {availableLanguages.map(lang => (
+                  <option key={lang} value={lang}>{lang.charAt(0).toUpperCase() + lang.slice(1)}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
       )}
 
-      {loadingMessage && <p className="status-message">{loadingMessage}</p>}
+      {loadingMessage && (
+        <div className="loading-container">
+          <IoMusicalNotes className="loading-icon" />
+          <p className="status-message">{loadingMessage}</p>
+        </div>
+      )}
+      
       {error && <p className="error-message">{error}</p>}
 
       {!isDetectingMood && playlists.length > 0 && (
         <div className="playlists-container">
           {playlists.map(playlist => {
-            // --- Filter songs for this specific playlist ---
             const filteredSongs = playlist.songs.filter(song => 
               selectedLanguage === 'all' || song.language.toLowerCase() === selectedLanguage.toLowerCase()
             );
 
-            // --- Only render the playlist section if it has songs after filtering ---
             if (filteredSongs.length === 0) {
               return null;
             }
@@ -178,7 +231,7 @@ const Dashboard = () => {
                       <div 
                         key={song._id} 
                         className="song-card" 
-                        onClick={() => handleSongSelect(song, filteredSongs)} // Pass the filtered list for correct next/prev
+                        onClick={() => handleSongSelect(song, filteredSongs)}
                       >
                         <div className="song-card-image-wrapper">
                           <img src={song.coverPhotoUrl} alt={song.title} className="song-cover" />
